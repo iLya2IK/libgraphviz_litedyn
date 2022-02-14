@@ -44,7 +44,7 @@ var
   NI, EI : IGVIterator;
   FS : TFileStream;
 begin
-  if InitGVIZInterface then // initalize gvc and cgraph libs
+  if TGVContext.GVLibsLoad then // initalize gvc and cgraph libs
   begin
     Cntx := TGVContext.Create;
     try
@@ -81,11 +81,11 @@ begin
         Gv.Edge(Nv[8], Nv[6]).SetExAttr(Av, 'S(b)');
         Gv.Edge(Nv[8], Nv[5]).SetExAttr(Av, 'S(a)');
 
-		// place the graph in a contextual layout to initialize 
-		// drawing interfaces using a specific engine (dot)
+        // place the graph in a contextual layout to initialize 
+        // drawing interfaces using a specific engine (dot)
         Gv.Layout(Cntx, 'dot');		
 
-		// iterating through all nodes and edges of the graph
+        // iterating through all nodes and edges of the graph
         NI := Gv.GetNodeIterator;
         while NI.HasNext do
         begin
@@ -99,7 +99,7 @@ begin
           end;
         end;
 
-		// draw the graph in an SVG file
+        // draw the graph in an SVG file
         Gv.RenderFilename('svg', 'out3.svg');
 		
         // example of drawing the graph into a stream
@@ -117,7 +117,7 @@ begin
       Cntx.Free;
     end;
 
-    DestroyGVIZInterface;
+    TGVContext.GVLibsUnLoad;
   end else begin
     WriteLn('Cant initialize Graphviz');
   end;
