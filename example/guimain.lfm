@@ -1,0 +1,89 @@
+object Form1: TForm1
+  Left = 480
+  Height = 578
+  Top = 266
+  Width = 909
+  Caption = 'Form1'
+  ClientHeight = 578
+  ClientWidth = 909
+  OnCreate = FormCreate
+  OnDeactivate = FormDeactivate
+  LCLVersion = '2.2.0.4'
+  object GroupBox1: TGroupBox
+    Left = 0
+    Height = 578
+    Top = 0
+    Width = 353
+    Align = alLeft
+    Caption = 'Dot file description'
+    ClientHeight = 558
+    ClientWidth = 349
+    TabOrder = 0
+    object DotFileDescr: TMemo
+      Left = 0
+      Height = 532
+      Top = 26
+      Width = 349
+      Align = alClient
+      Font.Name = 'Courier New'
+      Lines.Strings = (
+        'digraph finite_state_machine {'
+        #9'rankdir=LR;'
+        #9'size="8,5"'
+        #9'node [shape = doublecircle]; 0 3 4 8;'
+        #9'node [shape = circle];'
+        #9'0 -> 2 [label = "SS(B)"];'
+        #9'0 -> 1 [label = "SS(S)"];'
+        #9'1 -> 3 [label = "S($end)"];'
+        #9'2 -> 6 [label = "SS(b)"];'
+        #9'2 -> 5 [label = "SS(a)"];'
+        #9'2 -> 4 [label = "S(A)"];'
+        #9'5 -> 7 [label = "S(b)"];'
+        #9'5 -> 5 [label = "S(a)"];'
+        #9'6 -> 6 [label = "S(b)"];'
+        #9'6 -> 5 [label = "S(a)"];'
+        #9'7 -> 8 [label = "S(b)"];'
+        #9'7 -> 5 [label = "S(a)"];'
+        #9'8 -> 6 [label = "S(b)"];'
+        #9'8 -> 5 [label = "S(a)"];'
+        '}'
+      )
+      ParentFont = False
+      TabOrder = 0
+    end
+    object ToolBar1: TToolBar
+      Left = 0
+      Height = 26
+      Top = 0
+      Width = 349
+      Caption = 'ToolBar1'
+      ShowCaptions = True
+      TabOrder = 1
+      object ToolButton1: TToolButton
+        Left = 1
+        Top = 2
+        AutoSize = True
+        Caption = 'Draw!'
+        OnClick = ToolButton1Click
+      end
+    end
+  end
+  object ScrollBox1: TScrollBox
+    Left = 353
+    Height = 578
+    Top = 0
+    Width = 556
+    HorzScrollBar.Page = 535
+    VertScrollBar.Page = 557
+    Align = alClient
+    ClientHeight = 557
+    ClientWidth = 535
+    TabOrder = 1
+    object Image1: TImage
+      Left = 0
+      Height = 578
+      Top = 0
+      Width = 556
+    end
+  end
+end

@@ -1,0 +1,14 @@
+*/lib/*
+*/backup/*
+*/*/backup/*
+*.lps
+*.o
+*.ppu
+*.dbg
+*.exe
+*.dll
+*.obj
+*.bmp
+*.svg
+config*
+*.res
