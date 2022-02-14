@@ -1,4 +1,5 @@
-libGraphViz_dynlite
+libGraphViz_litedyn
+===================
 
 It is free pascal bindings and wrapper around cGraph and GVC libraries (Graphviz). Graphviz is open source graph visualization software. Graph visualization is a way of representing structural information as diagrams of abstract graphs and networks. It has important applications in networking, bioinformatics, software engineering, database and web design, machine learning, and in visual interfaces for other technical domains. This wrapper and bindings are written for dynamically linking with libraries cGraph and GVC.
 
