@@ -8,14 +8,9 @@ unit libgraphviz_ilya2ik;
 interface
 
 uses
-  libGraphviz_dynlite, OGLGraphvizWrapper, LazarusPackageIntf;
+  libGraphviz_dynlite, OGLGraphvizWrapper;
 
 implementation
 
-procedure Register;
-begin
-end;
-
-initialization
-  RegisterPackage('libgraphviz_ilya2ik', @Register);
 end.
+
