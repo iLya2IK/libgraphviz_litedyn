@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
-  <Package Version="5">
+  <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="libgraphviz_ilya2ik"/>
     <Type Value="RunAndDesignTime"/>
+    <Author Value="Copyright (c) 2022, Ilya Medvedkov"/>
     <CompilerOptions>
       <Version Value="11"/>
       <PathDelim Value="\"/>
@@ -11,20 +12,20 @@
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files>
-      <Item>
+    <Files Count="2">
+      <Item1>
         <Filename Value="libgraphviz_dynlite.pas"/>
         <UnitName Value="libGraphviz_dynlite"/>
-      </Item>
-      <Item>
+      </Item1>
+      <Item2>
         <Filename Value="oglgraphvizwrapper.pas"/>
         <UnitName Value="OGLGraphvizWrapper"/>
-      </Item>
+      </Item2>
     </Files>
-    <RequiredPkgs>
-      <Item>
+    <RequiredPkgs Count="1">
+      <Item1>
         <PackageName Value="FCL"/>
-      </Item>
+      </Item1>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>

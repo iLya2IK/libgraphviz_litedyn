@@ -34,6 +34,9 @@ const
 {$if defined(UNIX) and not defined(darwin)}
   CGraphDLL = 'libcgraph';
   GVCDLL = 'libgvc';
+
+  DLLPostfixes : Array [0..3] of string = ('.so', '.so.6', '.so.6.0.0',
+                                           '.so.5');
 {$ELSE}
 {$ifdef WINDOWS}
   CGraphDLL = 'cgraph';
@@ -386,14 +389,21 @@ const
 
 {$IFNDEF WINDOWS}
 { Try to load all library versions until you find or run out }
-function LoadLibUnix;
+procedure LoadLibUnix;
+var i : integer;
 begin
-  CGraphLib := LoadLibrary(CGraphDLL + '.so');
-  GVCLib := LoadLibrary(GVCDLL + '.so');
+  CGraphLib := NilHandle;
+  GVCLib := NilHandle;
+  for i := Low(DLLPostfixes) to High(DLLPostfixes) do
+  begin
+    if CGraphLib = NilHandle then
+      CGraphLib := LoadLibrary(CGraphDLL + DLLPostfixes[i]);
+    if GVCLib = NilHandle then
+      GVCLib := LoadLibrary(GVCDLL + DLLPostfixes[i]);
+  end;
 end;
 
 {$ELSE WINDOWS}
-{ Try to load all win library versions until you find or run out }
 procedure LoadLibsWin;
 begin
   CGraphLib := LoadLibrary(CGraphDLL + '.dll');
