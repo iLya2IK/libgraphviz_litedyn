@@ -1,7 +1,7 @@
 libGraphViz_litedyn
 ===================
 
-It is free pascal bindings and wrapper around cGraph and GVC libraries (Graphviz). Graphviz is open source graph visualization software. Graph visualization is a way of representing structural information as diagrams of abstract graphs and networks. It has important applications in networking, bioinformatics, software engineering, database and web design, machine learning, and in visual interfaces for other technical domains. This wrapper and bindings are written for dynamically linking with libraries cGraph and GVC.
+It is free pascal bindings and wrapper around cGraph and GVC libraries (Graphviz). Graphviz is open source graph visualization software. Graph visualization is a way of representing structural information as diagrams of abstract graphs and networks. This wrapper and bindings are written for dynamically linking with libraries cGraph and GVC.
 
  
 ### Requirements
@@ -19,7 +19,7 @@ It is free pascal bindings and wrapper around cGraph and GVC libraries (Graphviz
 
 ### Installation
 
-Get the sources and add the *source* directory to the project search path. For the Lazarus development environment, you can install the libgraphviz_ilya2ik.lpk package for your project. For FPC add the *source* directory to the *fpc.cfg* file.
+Get the sources and add the *src* directory to the project search path. For the Lazarus development environment, you can install the *libgraphviz_ilya2ik.lpk* package for your project. For FPC add the *src* directory to the *fpc.cfg* file.
 
 
 #### Usage example
@@ -32,8 +32,6 @@ Get the sources and add the *source* directory to the project search path. For t
 program simpletest;
 
 uses Classes, OGLGraphvizWrapper;
-
-const cLabel = 'label';
 
 var
   // wrapper
@@ -65,7 +63,7 @@ begin
         Nv[5] := Gv.Node('5');
         Nv[7] := Gv.Node('7');
 
-        Av := Gv.EdgeAttr(cLabel, '');
+        Av := Gv.EdgeAttr('label', '');
         Ev := Gv.Edge(Gv.FindNode('0'), Gv.FindNode('2'));
         Ev.SetExAttr(Av, 'SS(B)');
         Gv.Edge(Nv[0], Nv[1]).SetExAttr(Av, 'SS(S)');
