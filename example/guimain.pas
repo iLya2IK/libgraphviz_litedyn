@@ -39,21 +39,18 @@ implementation
 
 procedure TForm1.ToolButton1Click(Sender : TObject);
 var
-  Str : TMemoryStream;
+  Str : TGVRenderStream;
   G : IGVCntxGraph;
   bmp : TBitmap;
 begin
   if not TGVContext.IsGVLibsLoaded then Exit;
   bmp := TBitmap.Create;
   try
-    Str := TMemoryStream.Create;
+    G := Cntx.NewGraph(DotFileDescr.Lines);
+    G.Layout(Cntx, 'dot');
+    Str := G.RenderMemory('bmp');
     try
-      G := Cntx.NewGraph(DotFileDescr.Lines);
-      G.Layout(Cntx, 'dot');
-      G.RenderStream('bmp', Str);
       G.Close;
-
-      Str.Position := 0;
       bmp.LoadFromStream(Str);
     finally
       Str.Free;

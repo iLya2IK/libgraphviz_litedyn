@@ -32,6 +32,7 @@ type
   TGVContext = class;
 
   IGVGraph = interface;
+  IGVCntxGraph = interface;
 
   IGVObject = interface(IUnknown)
    ['{b79ff0b0-9f9e-4a1b-b6f9-cca5578e1df3}']
@@ -111,12 +112,20 @@ type
    procedure Close;
   end;
 
+  { TGVRenderStream }
+
+  TGVRenderStream = class(TCustomMemoryStream)
+  public
+    destructor Destroy; override;
+  end;
+
   IGVCntxGraph = interface(IGVGraph)
    ['{e8f2d8ec-743b-4b2a-bf99-f58af63f8124}']
 
    procedure Layout(aCntx: TGVContext; const engine: String);
    procedure RenderFilename(const format, filename : String);
    procedure RenderStream(const format : String; outs : TStream);
+   function  RenderMemory(const format : String) : TGVRenderStream;
    procedure Render(const format : String);
    procedure FreeLayout;
 
@@ -247,6 +256,7 @@ type
     procedure Layout(aCntx: TGVContext; const engine: String);
     procedure RenderFilename(const format, filename : String);
     procedure RenderStream(const format : String; outs : TStream);
+    function  RenderMemory(const format : String) : TGVRenderStream;
     procedure Render(const format : String);
     procedure FreeLayout;
 
@@ -274,6 +284,15 @@ type
   end;
 
 implementation
+
+{ TGVRenderStream }
+
+destructor TGVRenderStream.Destroy;
+begin
+  if Assigned(Memory) then
+    gvFreeRenderData(Memory);
+  inherited Destroy;
+end;
 
 { TGVIterator }
 
@@ -377,6 +396,19 @@ procedure TGVCntxGraph.Render(const format: String);
 begin
   if Assigned(FCntx) then
     gvRender(FCntx.FContext, Graph, format);
+end;
+
+function TGVCntxGraph.RenderMemory(const format : String) : TGVRenderStream;
+var
+  buf : PAnsiChar = nil;
+  sz : Integer = 0;
+begin
+  Result := TGVRenderStream.Create;
+  if Assigned(FCntx) then begin
+    gvRenderData(FCntx.FContext, Graph, format, @buf, @sz);
+    Result.SetPointer(buf, sz);
+    Result.Position := 0;
+  end;
 end;
 
 procedure TGVCntxGraph.FreeLayout;
