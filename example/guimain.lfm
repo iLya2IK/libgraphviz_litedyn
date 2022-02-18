@@ -1,14 +1,14 @@
 object Form1: TForm1
-  Left = 480
+  Left = 457
   Height = 578
-  Top = 266
+  Top = 127
   Width = 909
   Caption = 'Form1'
   ClientHeight = 578
   ClientWidth = 909
   OnCreate = FormCreate
-  OnDeactivate = FormDeactivate
-  LCLVersion = '2.2.0.4'
+  OnDestroy = FormDestroy
+  LCLVersion = '2.0.12.0'
   object GroupBox1: TGroupBox
     Left = 0
     Height = 578
@@ -17,13 +17,13 @@ object Form1: TForm1
     Align = alLeft
     Caption = 'Dot file description'
     ClientHeight = 558
-    ClientWidth = 349
+    ClientWidth = 351
     TabOrder = 0
     object DotFileDescr: TMemo
       Left = 0
-      Height = 532
+      Height = 366
       Top = 26
-      Width = 349
+      Width = 351
       Align = alClient
       Font.Name = 'Courier New'
       Lines.Strings = (
@@ -55,7 +55,7 @@ object Form1: TForm1
       Left = 0
       Height = 26
       Top = 0
-      Width = 349
+      Width = 351
       Caption = 'ToolBar1'
       ShowCaptions = True
       TabOrder = 1
@@ -67,23 +67,51 @@ object Form1: TForm1
         OnClick = ToolButton1Click
       end
     end
+    object Panel1: TPanel
+      Left = 0
+      Height = 166
+      Top = 392
+      Width = 351
+      Align = alBottom
+      ClientHeight = 166
+      ClientWidth = 351
+      TabOrder = 2
+      object Memo1: TMemo
+        Left = 1
+        Height = 145
+        Top = 20
+        Width = 349
+        Align = alClient
+        TabOrder = 0
+      end
+      object Label1: TLabel
+        Left = 1
+        Height = 19
+        Top = 1
+        Width = 349
+        Align = alTop
+        Caption = 'Selected node (click on graph)'
+        ParentColor = False
+      end
+    end
   end
   object ScrollBox1: TScrollBox
     Left = 353
     Height = 578
     Top = 0
     Width = 556
-    HorzScrollBar.Page = 535
-    VertScrollBar.Page = 557
+    HorzScrollBar.Page = 541
+    VertScrollBar.Page = 563
     Align = alClient
-    ClientHeight = 557
-    ClientWidth = 535
+    ClientHeight = 563
+    ClientWidth = 541
     TabOrder = 1
     object Image1: TImage
       Left = 0
       Height = 578
       Top = 0
       Width = 556
+      OnMouseDown = Image1MouseDown
     end
   end
 end

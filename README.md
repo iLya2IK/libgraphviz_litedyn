@@ -94,7 +94,7 @@ begin
           while EI.HasNext do
           begin
             Ev := EI.Next as IGVEdge;
-            WriteLn('  Edge ', Ev.GetExAttr(Av));
+            WriteLn('  Edge ', Ev.GetExAttr(Av).AsString);
           end;
         end;
 

@@ -12,7 +12,7 @@
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="2">
+    <Files Count="3">
       <Item1>
         <Filename Value="libgraphviz_dynlite.pas"/>
         <UnitName Value="libGraphviz_dynlite"/>
@@ -21,6 +21,10 @@
         <Filename Value="oglgraphvizwrapper.pas"/>
         <UnitName Value="OGLGraphvizWrapper"/>
       </Item2>
+      <Item3>
+        <Filename Value="oglgraphvizobjectseeker.pas"/>
+        <UnitName Value="oglgraphvizobjectseeker"/>
+      </Item3>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

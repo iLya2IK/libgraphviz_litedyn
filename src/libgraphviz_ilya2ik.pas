@@ -8,7 +8,8 @@ unit libgraphviz_ilya2ik;
 interface
 
 uses
-  libGraphviz_dynlite, OGLGraphvizWrapper, LazarusPackageIntf;
+  libGraphviz_dynlite, OGLGraphvizWrapper, OGLGraphvizObjectSeeker, 
+  LazarusPackageIntf;
 
 implementation
 

@@ -34,6 +34,13 @@ type
   IGVGraph = interface;
   IGVCntxGraph = interface;
 
+  IGVAttr = interface(IUnknown)
+   ['{bf3f0402-cf04-4bbe-b7db-e32ffdfc920c}']
+   function AsString  : String;
+   function AsFloat   : Double;
+   function AsInteger : Integer;
+  end;
+
   IGVObject = interface(IUnknown)
    ['{b79ff0b0-9f9e-4a1b-b6f9-cca5578e1df3}']
    function Obj : Pointer;
@@ -41,9 +48,12 @@ type
    function Kind : TAgObjKind;
    function Root : IGVGraph;
    function GetAttrId(const atrName : String) : TGVAttrId;
-   function GetAttr(const atrName : String) : String;
-   function GetExAttr(atrId : TGVAttrId) : String;
+   function GetAttr(const atrName : String) : IGVAttr;
+   function GetAttrDef(const atrName, def : String) : IGVAttr;
+   function GetExAttr(atrId : TGVAttrId) : IGVAttr;
+   function GetExAttrDef(atrId : TGVAttrId; const def : String) : IGVAttr;
    function SetAttr(const atrName, value : String) : IGVObject;
+   function SetAttrSafe(const atrName, value, def : String) : IGVObject;
    function SetExAttr(atrId : TGVAttrId; const value : String) : IGVObject;
   end;
 
@@ -112,6 +122,18 @@ type
    procedure Close;
   end;
 
+  { TGVAttr }
+
+  TGVAttr = class(TInterfacedObject, IGVAttr)
+  private
+    FValue : String;
+  public
+    constructor Create(const aValue : String);
+    function AsString  : String;
+    function AsFloat   : Double;
+    function AsInteger : Integer;
+  end;
+
   { TGVRenderStream }
 
   TGVRenderStream = class(TCustomMemoryStream)
@@ -161,9 +183,12 @@ type
     function Kind : TAgObjKind;
     function Root : IGVGraph;
     function GetAttrId(const atrName : String) : TGVAttrId;
-    function GetAttr(const atrName : String) : String;
-    function GetExAttr(atrId : TGVAttrId) : String;
+    function GetAttr(const atrName : String) : IGVAttr;
+    function GetAttrDef(const atrName, def : String) : IGVAttr;
+    function GetExAttr(atrId : TGVAttrId) : IGVAttr;
+    function GetExAttrDef(atrId : TGVAttrId; const def : String) : IGVAttr;
     function SetAttr(const atrName, value : String) : IGVObject;
+    function SetAttrSafe(const atrName, value, def : String) : IGVObject;
     function SetExAttr(atrId : TGVAttrId; const value : String) : IGVObject;
   end;
 
@@ -281,9 +306,34 @@ type
     class function GVLibsLoad : Boolean;
     class function IsGVLibsLoaded : Boolean;
     class function GVLibsUnLoad : Boolean;
+    class function GraphvizFormatSettings : TFormatSettings;
   end;
 
 implementation
+
+var vFS : TFormatSettings;
+
+{ TGVAttr }
+
+constructor TGVAttr.Create(const aValue : String);
+begin
+  FValue := aValue;
+end;
+
+function TGVAttr.AsString : String;
+begin
+  Result := FValue;
+end;
+
+function TGVAttr.AsFloat : Double;
+begin
+  Result := StrToFloat(FValue, TGVContext.GraphvizFormatSettings);
+end;
+
+function TGVAttr.AsInteger : Integer;
+begin
+  Result := StrToInt(FValue);
+end;
 
 { TGVRenderStream }
 
@@ -499,19 +549,37 @@ begin
   Result := TGVAttrId(agattrsym(FObj, atrName));
 end;
 
-function TGVObject.GetAttr(const atrName: String): String;
+function TGVObject.GetAttr(const atrName: String): IGVAttr;
 begin
-  Result := agget(FObj, atrName);
+  Result := TGVAttr.Create(agget(FObj, atrName)) as IGVAttr;
 end;
 
-function TGVObject.GetExAttr(atrId: TGVAttrId): String;
+function TGVObject.GetAttrDef(const atrName, def : String) : IGVAttr;
 begin
-  Result := agxget(FObj, pAgsym_t(atrId));
+  Result := GetExAttrDef(GetAttrId(atrName), def);
+end;
+
+function TGVObject.GetExAttr(atrId: TGVAttrId): IGVAttr;
+begin
+  Result := TGVAttr.Create(agxget(FObj, pAgsym_t(atrId))) as IGVAttr;
+end;
+
+function TGVObject.GetExAttrDef(atrId : TGVAttrId; const def : String) : IGVAttr;
+begin
+  if Assigned(atrId) then
+    Result := GetExAttr(atrId) else
+    Result := TGVAttr.Create(def) as IGVAttr;
 end;
 
 function TGVObject.SetAttr(const atrName, value: String): IGVObject;
 begin
   agset(FObj, atrName, value);
+  Result := Self as IGVObject;
+end;
+
+function TGVObject.SetAttrSafe(const atrName, value, def : String) : IGVObject;
+begin
+  agsafeset(FObj, atrName, value, def);
   Result := Self as IGVObject;
 end;
 
@@ -722,7 +790,7 @@ begin
   Result := TGVGraph.Create(agidsubg(Graph, aId, true)) as IGVGraph;
 end;
 
-function TGVGraph.Subgraph: IGVGraph;
+function TGVGraph.Subgraph() : IGVGraph;
 begin
   Result := Subgraph('');
 end;
@@ -803,6 +871,16 @@ class function TGVContext.GVLibsUnLoad : Boolean;
 begin
   Result := DestroyGVIZInterface;
 end;
+
+class function TGVContext.GraphvizFormatSettings : TFormatSettings;
+begin
+  Result := vFS;
+end;
+
+initialization
+  vFS := DefaultFormatSettings;
+  vFS.DecimalSeparator := '.';
+  vFS.ThousandSeparator := #0;
 
 end.
 
