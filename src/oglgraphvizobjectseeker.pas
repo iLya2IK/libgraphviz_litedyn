@@ -142,8 +142,11 @@ type
     function FindNodeAtPt(ipt : TPTPoint) : TPTNode;
     function FindNodeAtCanvasPt(pt : TPoint) : TPTNode;
     function CanvasPtToGraph(pt : TPoint) : TPTPoint;
+    function GraphPtToCanvas(pt : TPTPoint) : TPoint;
     procedure AddNode(aNode : TPTNode);
     procedure AddEdge(aEdge : TPTEdge);
+
+    property Dpi : Double read FDpi;
   end;
 
   { TPlainTextParser }
@@ -342,6 +345,12 @@ function TPTGraph.CanvasPtToGraph(pt : TPoint) : TPTPoint;
 begin
   Result.x := double(pt.X) / FDpi;
   Result.y := double(FDotHeight - pt.Y) / FDpi;
+end;
+
+function TPTGraph.GraphPtToCanvas(pt: TPTPoint): TPoint;
+begin
+  Result.x := Round(pt.X * FDpi);
+  Result.y := Round(FDotHeight - pt.Y * FDpi);
 end;
 
 procedure TPTGraph.AddNode(aNode : TPTNode);
