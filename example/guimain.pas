@@ -90,7 +90,7 @@ end;
 
 procedure TForm1.FormCreate(Sender : TObject);
 begin
-  if TGVContext.GVLibsLoad then
+  if TGVContext.GVLibsLoadDefault then
   begin
     Cntx := TGVContext.Create;
   end else

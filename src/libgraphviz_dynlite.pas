@@ -32,17 +32,13 @@ uses dynlibs, SysUtils;
 
 const
 {$if defined(UNIX) and not defined(darwin)}
-  CGraphDLL = 'libcgraph';
-  GVCDLL = 'libgvc';
-
-  DLLPostfixes : Array [0..3] of string = ('.so', '.so.6', '.so.6.0.0',
-                                           '.so.5');
+  GVDLL: Array [0..1] of string = ('libcgraph.so', 'libgvc.so');
 {$ELSE}
 {$ifdef WINDOWS}
-  CGraphDLL = 'cgraph';
-  GVCDLL = 'gvc';
+  GVDLL: Array [0..1] of string = ('cgraph.dll', 'gvc.dll');
 {$endif}
 {$endif}
+
 
 type
   pGVC_t = Pointer;
@@ -177,15 +173,13 @@ function agdegree(g: pAgraph_t; n: pAgnode_t; inv, outv: Boolean): integer;
 function agcountuniqedges(g: pAgraph_t; n: pAgnode_t; inv, outv: Boolean): integer;
 
 function IsGVIZloaded: boolean;
-function InitGVIZInterface: boolean; overload;
+function InitGVIZInterface(const aLibs : array of String): boolean;
 function DestroyGVIZInterface: boolean;
 
 implementation
 
 var
   GVIZloaded: boolean = False;
-  CGraphLib: HModule = NilHandle;
-  GVCLib: HModule = NilHandle;
 
 resourcestring
   SFailedToLoadGraphviz = 'Failed to load Graphviz library';
@@ -387,27 +381,28 @@ const
   _AGCFLAG: array [boolean] of integer = (0, 1);
   _AGCKIND: array [TAgObjKind] of integer = (cAGRAPH, cAGNODE, cAGEDGE, cAGINEDGE, cAGOUTEDGE);
 
+var
+  GVLib: Array of HModule;
+
 {$IFNDEF WINDOWS}
 { Try to load all library versions until you find or run out }
-procedure LoadLibUnix;
+procedure LoadLibUnix(const aLibs : Array of String);
 var i : integer;
 begin
-  CGraphLib := NilHandle;
-  GVCLib := NilHandle;
-  for i := Low(DLLPostfixes) to High(DLLPostfixes) do
+  for i := 0 to High(aLibs) do
   begin
-    if CGraphLib = NilHandle then
-      CGraphLib := LoadLibrary(CGraphDLL + DLLPostfixes[i]);
-    if GVCLib = NilHandle then
-      GVCLib := LoadLibrary(GVCDLL + DLLPostfixes[i]);
+    GVLib[i] := LoadLibrary(aLibs[i]);
   end;
 end;
 
 {$ELSE WINDOWS}
-procedure LoadLibsWin;
+procedure LoadLibsWin(const aLibs : Array of String);
+var i : integer;
 begin
-  CGraphLib := LoadLibrary(CGraphDLL + '.dll');
-  GVCLib := LoadLibrary(GVCDLL + '.dll');
+  for i := 0 to High(aLibs) do
+  begin
+    GVLib[i] := LoadLibrary(aLibs[i]);
+  end;
 end;
 
 {$ENDIF WINDOWS}
@@ -887,104 +882,111 @@ begin
 end;
 
 procedure UnloadLibraries;
+var i : integer;
 begin
   GVIZloaded := False;
-  if CGraphLib <> NilHandle then
+  for i := 0 to High(GVLib) do
+  if GVLib[i] <> NilHandle then
   begin
-    FreeLibrary(CGraphLib);
-    CGraphLib := NilHandle;
-  end;
-  if GVCLib <> NilHandle then
-  begin
-    FreeLibrary(GVCLib);
-    GVCLib := NilHandle;
+    FreeLibrary(GVLib[i]);
+    GVLib[i] := NilHandle;
   end;
 end;
 
-function LoadLibraries: boolean;
+function LoadLibraries(const aLibs : Array of String): boolean;
+var i : integer;
 begin
+  SetLength(GVLib, Length(aLibs));
   Result := False;
   {$IFDEF WINDOWS}
-  LoadLibsWin;
+  LoadLibsWin(aLibs);
   {$ELSE}
-  LoadLibUnix;
+  LoadLibUnix(aLibs);
   {$ENDIF}
-  Result := (GVCLib <> NilHandle) and (CGraphLib <> NilHandle);
+  for i := 0 to High(aLibs) do
+  if GVLib[i] <> NilHandle then
+     Result := true;
 end;
 
-function GetProcAddr(module: HModule; const ProcName: string): Pointer;
+function GetProcAddr(const module: Array of HModule; const ProcName: string): Pointer;
+var i : integer;
 begin
-  Result := GetProcAddress(module, PChar(ProcName));
+  for i := Low(module) to High(module) do
+  if module[i] <> NilHandle then
+  begin
+    Result := GetProcAddress(module[i], PChar(ProcName));
+    if Assigned(Result) then Exit;
+  end;
 end;
 
 procedure LoadGVIZEntryPoints;
 begin
-  _gvContext := p_gvContext(GetProcAddr(GVCLib, 'gvContext'));
-  _gvLayout := p_gvLayout(GetProcAddr(GVCLib, 'gvLayout'));
-  _gvFreeContext := p_gvFreeContext(GetProcAddr(GVCLib, 'gvFreeContext'));
-  _gvFreeRenderData := p_gvFreeRenderData(GetProcAddr(GVCLib, 'gvFreeRenderData'));
-  _gvRenderData := p_gvRenderData(GetProcAddr(GVCLib, 'gvRenderData'));
-  _gvRenderFilename := p_gvRenderFilename(GetProcAddr(GVCLib, 'gvRenderFilename'));
-  _gvRender := p_gvRender(GetProcAddr(GVCLib, 'gvRender'));
-  _gvFreeLayout := p_gvFreeLayout(GetProcAddr(GVCLib, 'gvFreeLayout'));
+  _gvContext := p_gvContext(GetProcAddr(GVLib, 'gvContext'));
+  _gvLayout := p_gvLayout(GetProcAddr(GVLib, 'gvLayout'));
+  _gvFreeContext := p_gvFreeContext(GetProcAddr(GVLib, 'gvFreeContext'));
+  _gvFreeRenderData := p_gvFreeRenderData(GetProcAddr(GVLib, 'gvFreeRenderData'));
+  _gvRenderData := p_gvRenderData(GetProcAddr(GVLib, 'gvRenderData'));
+  _gvRenderFilename := p_gvRenderFilename(GetProcAddr(GVLib, 'gvRenderFilename'));
+  _gvRender := p_gvRender(GetProcAddr(GVLib, 'gvRender'));
+  _gvFreeLayout := p_gvFreeLayout(GetProcAddr(GVLib, 'gvFreeLayout'));
 
-  _agmemread := p_agmemread(GetProcAddr(CGraphLib, 'agmemread'));
-  _agclose := p_agclose(GetProcAddr(CGraphLib, 'agclose'));
-  _agopen := p_agopen(GetProcAddr(CGraphLib, 'agopen'));
+  _agmemread := p_agmemread(GetProcAddr(GVLib, 'agmemread'));
+  _agclose := p_agclose(GetProcAddr(GVLib, 'agclose'));
+  _agopen := p_agopen(GetProcAddr(GVLib, 'agopen'));
 
-  _agnode := p_agnode(GetProcAddr(CGraphLib, 'agnode'));
-  _agidnode := p_agidnode(GetProcAddr(CGraphLib, 'agidnode'));
-  _agsubnode := p_agsubnode(GetProcAddr(CGraphLib, 'agsubnode'));
-  _agfstnode := p_agfstnode(GetProcAddr(CGraphLib, 'agfstnode'));
-  _agnxtnode := p_agnxtnode(GetProcAddr(CGraphLib, 'agnxtnode'));
-  _aglstnode := p_aglstnode(GetProcAddr(CGraphLib, 'aglstnode'));
-  _agprvnode := p_agprvnode(GetProcAddr(CGraphLib, 'agprvnode'));
+  _agnode := p_agnode(GetProcAddr(GVLib, 'agnode'));
+  _agidnode := p_agidnode(GetProcAddr(GVLib, 'agidnode'));
+  _agsubnode := p_agsubnode(GetProcAddr(GVLib, 'agsubnode'));
+  _agfstnode := p_agfstnode(GetProcAddr(GVLib, 'agfstnode'));
+  _agnxtnode := p_agnxtnode(GetProcAddr(GVLib, 'agnxtnode'));
+  _aglstnode := p_aglstnode(GetProcAddr(GVLib, 'aglstnode'));
+  _agprvnode := p_agprvnode(GetProcAddr(GVLib, 'agprvnode'));
 
-  _agsubrep := p_agsubrep(GetProcAddr(CGraphLib, 'agsubrep'));
-  _agnodebefore := p_agnodebefore(GetProcAddr(CGraphLib, 'agnodebefore'));
+  _agsubrep := p_agsubrep(GetProcAddr(GVLib, 'agsubrep'));
+  _agnodebefore := p_agnodebefore(GetProcAddr(GVLib, 'agnodebefore'));
 
-  _agedge := p_agedge(GetProcAddr(CGraphLib, 'agedge'));
-  _agidedge := p_agidedge(GetProcAddr(CGraphLib, 'agidedge'));
-  _agsubedge := p_agsubedge(GetProcAddr(CGraphLib, 'agsubedge'));
-  _agfstin := p_agfstin(GetProcAddr(CGraphLib, 'agfstin'));
-  _agnxtin := p_agnxtin(GetProcAddr(CGraphLib, 'agnxtin'));
-  _agfstout := p_agfstout(GetProcAddr(CGraphLib, 'agfstout'));
-  _agnxtout := p_agnxtout(GetProcAddr(CGraphLib, 'agnxtout'));
-  _agfstedge := p_agfstedge(GetProcAddr(CGraphLib, 'agfstedge'));
-  _agnxtedge := p_agnxtedge(GetProcAddr(CGraphLib, 'agnxtedge'));
+  _agedge := p_agedge(GetProcAddr(GVLib, 'agedge'));
+  _agidedge := p_agidedge(GetProcAddr(GVLib, 'agidedge'));
+  _agsubedge := p_agsubedge(GetProcAddr(GVLib, 'agsubedge'));
+  _agfstin := p_agfstin(GetProcAddr(GVLib, 'agfstin'));
+  _agnxtin := p_agnxtin(GetProcAddr(GVLib, 'agnxtin'));
+  _agfstout := p_agfstout(GetProcAddr(GVLib, 'agfstout'));
+  _agnxtout := p_agnxtout(GetProcAddr(GVLib, 'agnxtout'));
+  _agfstedge := p_agfstedge(GetProcAddr(GVLib, 'agfstedge'));
+  _agnxtedge := p_agnxtedge(GetProcAddr(GVLib, 'agnxtedge'));
 
-  _agsubg := p_agsubg(GetProcAddr(CGraphLib, 'agsubg'));
-  _agidsubg := p_agidsubg(GetProcAddr(CGraphLib, 'agidsubg'));
-  _agfstsubg := p_agfstsubg(GetProcAddr(CGraphLib, 'agfstsubg'));
-  _agnxtsubg := p_agnxtsubg(GetProcAddr(CGraphLib, 'agnxtsubg'));
-  _agparent := p_agparent(GetProcAddr(CGraphLib, 'agparent'));
+  _agsubg := p_agsubg(GetProcAddr(GVLib, 'agsubg'));
+  _agidsubg := p_agidsubg(GetProcAddr(GVLib, 'agidsubg'));
+  _agfstsubg := p_agfstsubg(GetProcAddr(GVLib, 'agfstsubg'));
+  _agnxtsubg := p_agnxtsubg(GetProcAddr(GVLib, 'agnxtsubg'));
+  _agparent := p_agparent(GetProcAddr(GVLib, 'agparent'));
 
-  _agattr := p_agattr(GetProcAddr(CGraphLib, 'agattr'));
-  _agattrsym := p_agattrsym(GetProcAddr(CGraphLib, 'agattrsym'));
-  _agnxtattr := p_agnxtattr(GetProcAddr(CGraphLib, 'agnxtattr'));
-  _agcopyattr := p_agcopyattr(GetProcAddr(CGraphLib, 'agcopyattr'));
-  _agget := p_agget(GetProcAddr(CGraphLib, 'agget'));
-  _agxget := p_agxget(GetProcAddr(CGraphLib, 'agxget'));
-  _agset := p_agset(GetProcAddr(CGraphLib, 'agset'));
-  _agxset := p_agxset(GetProcAddr(CGraphLib, 'agxset'));
-  _agsafeset := p_agsafeset(GetProcAddr(CGraphLib, 'agsafeset'));
+  _agattr := p_agattr(GetProcAddr(GVLib, 'agattr'));
+  _agattrsym := p_agattrsym(GetProcAddr(GVLib, 'agattrsym'));
+  _agnxtattr := p_agnxtattr(GetProcAddr(GVLib, 'agnxtattr'));
+  _agcopyattr := p_agcopyattr(GetProcAddr(GVLib, 'agcopyattr'));
+  _agget := p_agget(GetProcAddr(GVLib, 'agget'));
+  _agxget := p_agxget(GetProcAddr(GVLib, 'agxget'));
+  _agset := p_agset(GetProcAddr(GVLib, 'agset'));
+  _agxset := p_agxset(GetProcAddr(GVLib, 'agxset'));
+  _agsafeset := p_agsafeset(GetProcAddr(GVLib, 'agsafeset'));
 
-  _agraphof := p_agraphof(GetProcAddr(CGraphLib, 'agraphof'));
-  _agroot := p_agroot(GetProcAddr(CGraphLib, 'agroot'));
-  _agcontains := p_agcontains(GetProcAddr(CGraphLib, 'agcontains'));
-  _agnameof := p_agnameof(GetProcAddr(CGraphLib, 'agnameof'));
-  _agrelabel_node := p_agrelabel_node(GetProcAddr(CGraphLib, 'agrelabel_node'));
-  _agdelete := p_agdelete(GetProcAddr(CGraphLib, 'agdelete'));
-  _agdelsubg := p_agdelsubg(GetProcAddr(CGraphLib, 'agdelsubg'));
-  _agdelnode := p_agdelnode(GetProcAddr(CGraphLib, 'agdelnode'));
-  _agdeledge := p_agdeledge(GetProcAddr(CGraphLib, 'agdeledge'));
-  _agobjkind := p_agobjkind(GetProcAddr(CGraphLib, 'agobjkind'));
+  _agraphof := p_agraphof(GetProcAddr(GVLib, 'agraphof'));
+  _agroot := p_agroot(GetProcAddr(GVLib, 'agroot'));
+  _agcontains := p_agcontains(GetProcAddr(GVLib, 'agcontains'));
+  _agnameof := p_agnameof(GetProcAddr(GVLib, 'agnameof'));
+  _agrelabel_node := p_agrelabel_node(GetProcAddr(GVLib, 'agrelabel_node'));
+  _agdelete := p_agdelete(GetProcAddr(GVLib, 'agdelete'));
+  _agdelsubg := p_agdelsubg(GetProcAddr(GVLib, 'agdelsubg'));
+  _agdelnode := p_agdelnode(GetProcAddr(GVLib, 'agdelnode'));
+  _agdeledge := p_agdeledge(GetProcAddr(GVLib, 'agdeledge'));
+  _agobjkind := p_agobjkind(GetProcAddr(GVLib, 'agobjkind'));
 
-  _agnnodes := p_agnnodes(GetProcAddr(CGraphLib, 'agnnodes'));
-  _agnedges := p_agnedges(GetProcAddr(CGraphLib, 'agnedges'));
-  _agnsubg := p_agnsubg(GetProcAddr(CGraphLib, 'agnsubg'));
-  _agdegree := p_agdegree(GetProcAddr(CGraphLib, 'agdegree'));
-  _agcountuniqedges := p_agcountuniqedges(GetProcAddr(CGraphLib, 'agcountuniqedges'));
+  _agnnodes := p_agnnodes(GetProcAddr(GVLib, 'agnnodes'));
+  _agnedges := p_agnedges(GetProcAddr(GVLib, 'agnedges'));
+  _agnsubg := p_agnsubg(GetProcAddr(GVLib, 'agnsubg'));
+  _agdegree := p_agdegree(GetProcAddr(GVLib, 'agdegree'));
+  _agcountuniqedges := p_agcountuniqedges(GetProcAddr(GVLib, 'agcountuniqedges'));
 end;
 
 procedure ClearGVIZEntryPoints;
@@ -1058,12 +1060,12 @@ begin
 
 end;
 
-function InitGVIZInterface: boolean;
+function InitGVIZInterface(const aLibs : array of String): boolean;
 begin
   Result := IsGVIZloaded;
   if Result then
     exit;
-  Result := LoadLibraries;
+  Result := LoadLibraries(aLibs);
   if not Result then
   begin
     UnloadLibraries;

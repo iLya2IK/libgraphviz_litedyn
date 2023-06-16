@@ -1,29 +1,30 @@
 object Form1: TForm1
   Left = 457
-  Height = 578
+  Height = 722
   Top = 127
-  Width = 909
+  Width = 1136
   Caption = 'Form1'
-  ClientHeight = 578
-  ClientWidth = 909
+  ClientHeight = 722
+  ClientWidth = 1136
+  DesignTimePPI = 120
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '2.0.12.0'
+  LCLVersion = '2.2.6.0'
   object GroupBox1: TGroupBox
     Left = 0
-    Height = 578
+    Height = 722
     Top = 0
-    Width = 353
+    Width = 441
     Align = alLeft
     Caption = 'Dot file description'
-    ClientHeight = 558
-    ClientWidth = 351
+    ClientHeight = 697
+    ClientWidth = 437
     TabOrder = 0
     object DotFileDescr: TMemo
       Left = 0
-      Height = 366
-      Top = 26
-      Width = 351
+      Height = 457
+      Top = 32
+      Width = 437
       Align = alClient
       Font.Name = 'Courier New'
       Lines.Strings = (
@@ -53,9 +54,8 @@ object Form1: TForm1
     end
     object ToolBar1: TToolBar
       Left = 0
-      Height = 26
       Top = 0
-      Width = 351
+      Width = 437
       Caption = 'ToolBar1'
       ShowCaptions = True
       TabOrder = 1
@@ -69,26 +69,26 @@ object Form1: TForm1
     end
     object Panel1: TPanel
       Left = 0
-      Height = 166
-      Top = 392
-      Width = 351
+      Height = 208
+      Top = 489
+      Width = 437
       Align = alBottom
-      ClientHeight = 166
-      ClientWidth = 351
+      ClientHeight = 208
+      ClientWidth = 437
       TabOrder = 2
       object Memo1: TMemo
         Left = 1
-        Height = 145
-        Top = 20
-        Width = 349
+        Height = 186
+        Top = 21
+        Width = 435
         Align = alClient
         TabOrder = 0
       end
       object Label1: TLabel
         Left = 1
-        Height = 19
+        Height = 20
         Top = 1
-        Width = 349
+        Width = 435
         Align = alTop
         Caption = 'Selected node (click on graph)'
         ParentColor = False
@@ -96,21 +96,21 @@ object Form1: TForm1
     end
   end
   object ScrollBox1: TScrollBox
-    Left = 353
-    Height = 578
+    Left = 441
+    Height = 722
     Top = 0
-    Width = 556
-    HorzScrollBar.Page = 541
-    VertScrollBar.Page = 563
+    Width = 695
+    HorzScrollBar.Page = 670
+    VertScrollBar.Page = 697
     Align = alClient
-    ClientHeight = 563
-    ClientWidth = 541
+    ClientHeight = 697
+    ClientWidth = 670
     TabOrder = 1
     object Image1: TImage
       Left = 0
-      Height = 578
+      Height = 722
       Top = 0
-      Width = 556
+      Width = 695
       OnMouseDown = Image1MouseDown
     end
   end

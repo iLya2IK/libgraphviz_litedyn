@@ -303,7 +303,8 @@ type
     function NewGraph(const aDotCode : String) : IGVCntxGraph;
     function NewGraph(aDotCode : TStrings) : IGVCntxGraph;
 
-    class function GVLibsLoad : Boolean;
+    class function GVLibsLoadDefault : Boolean;
+    class function GVLibsLoad(const CGraphLibLoc, GVLibLoc : String) : Boolean;
     class function IsGVLibsLoaded : Boolean;
     class function GVLibsUnLoad : Boolean;
     class function GraphvizFormatSettings : TFormatSettings;
@@ -857,9 +858,15 @@ begin
   Result := TGVCntxGraph.Create(aDotCode) as IGVCntxGraph;
 end;
 
-class function TGVContext.GVLibsLoad : Boolean;
+class function TGVContext.GVLibsLoadDefault: Boolean;
 begin
-  Result := InitGVIZInterface;
+  Result := InitGVIZInterface(GVDLL);
+end;
+
+class function TGVContext.GVLibsLoad(const CGraphLibLoc, GVLibLoc: String
+  ): Boolean;
+begin
+  Result := InitGVIZInterface([CGraphLibLoc, GVLibLoc]);
 end;
 
 class function TGVContext.IsGVLibsLoaded : Boolean;

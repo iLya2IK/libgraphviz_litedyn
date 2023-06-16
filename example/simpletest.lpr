@@ -32,7 +32,7 @@ var
   NI, EI : IGVIterator;
   FS : TFileStream;
 begin
-  if InitGVIZInterface then // initalize gvc and cgraph libs
+  if InitGVIZInterface(GVDLL) then // initalize gvc and cgraph libs
   begin
     //step 1. drawing a graph using native tools by parsing a dot file.
     gvc := gvContext();
